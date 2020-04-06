@@ -2,6 +2,7 @@
 
 ### Features
 1. [#14](https://github.com/influxdata/influxdb-client-php/pull/14): Checks the health of a running InfluxDB instance by querying the /health
+2. [#17](https://github.com/influxdata/influxdb-client-php/issues/17): Implemented default tags
 
 ## 1.1.0 [2020-03-13]
 
