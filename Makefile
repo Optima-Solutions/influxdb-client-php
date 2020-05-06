@@ -28,10 +28,10 @@ generate-sources:
 	@scripts/generate-sources.sh
 
 test: start-server
-	@docker-compose run php composer run test
+	@docker-compose run --rm php composer run test
 
 coverage: start-server
-	@docker-compose run php composer run test-coverage
+	@docker-compose run --rm php composer run test-coverage
 
 coverage-show:
 	open build/coverage-report/index.html
