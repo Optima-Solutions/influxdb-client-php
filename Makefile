@@ -2,6 +2,7 @@
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  init               to build php image and install all dependencies"
 	@echo "  start-server   	to start the InfluxDB server"
 	@echo "  stop-server    	to stop the InfluxDB server"
 	@echo "  test           	to perform unit tests"
@@ -18,6 +19,10 @@ dshell:
 
 deps:
 	@composer install
+
+init:
+	@docker-compose build
+	@docker-compose run php composer install
 
 generate-sources:
 	@scripts/generate-sources.sh
