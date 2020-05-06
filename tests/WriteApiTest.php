@@ -2,8 +2,12 @@
 
 namespace InfluxDB2Test;
 
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use InfluxDB2\ApiException;
+use InfluxDB2\Client;
+use InfluxDB2\Model\WritePrecision;
 use InfluxDB2\Point;
 
 require_once('BasicTest.php');
@@ -87,8 +91,9 @@ class WriteApiTest extends BasicTest
         $this->assertEquals($expected, strval($request->getBody()));
     }
 
-    public function testAuthorizationHeader()
+    public function testAuthorizationHeaderToken()
     {
+        $token = $this->writeApi->options['token'];
         $this->mockHandler->append(new Response(204));
         $this->writeApi->write('h2o,location=west value=33i 15');
 
@@ -96,7 +101,38 @@ class WriteApiTest extends BasicTest
 
         $this->assertEquals('http://localhost:9999/api/v2/write?org=my-org&bucket=my-bucket&precision=ns',
             strval($request->getUri()));
-        $this->assertEquals('Token my-token', implode(' ', $request->getHeaders()['Authorization']));
+        $this->assertEquals("Token {$token}", implode(' ', $request->getHeaders()['Authorization']));
+    }
+
+    public function testAuthorizationHeaderBearer()
+    {
+        $token = "jwt";
+
+        $this->client = new Client([
+            "url" => "http://localhost:9999",
+            "token" => $token,
+            "tokenType" => "Bearer",
+            "bucket" => "my-bucket",
+            "precision" => WritePrecision::NS,
+            "org" => "my-org"
+        ]);
+
+        $this->writeApi = $this->client->createWriteApi($this->getWriteOptions());
+
+        $history = Middleware::history($this->container);
+        $handlerStack = HandlerStack::create($this->mockHandler);
+        $handlerStack->push($history);
+
+        $this->writeApi->http = new \GuzzleHttp\Client([
+            'base_uri' => $this->writeApi->options["url"],
+            'handler' => $handlerStack,
+        ]);
+
+        $this->mockHandler->append(new Response(204));
+        $this->writeApi->write('h2o,location=west value=33i 15');
+
+        $request = $this->mockHandler->getLastRequest();
+        $this->assertEquals("Bearer {$token}", implode(' ', $request->getHeaders()['Authorization']));
     }
 
     public function testWithoutData()

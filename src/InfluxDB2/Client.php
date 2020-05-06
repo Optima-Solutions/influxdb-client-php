@@ -21,6 +21,7 @@ class Client
      *      client = new Client([
      *          "url" => "http://localhost:9999",
      *          "token" => "my-token",
+     *          "tokenType" => "Token",
      *          "bucket" => "my-bucket",
      *          "precision" => WritePrecision::NS,
      *          "org" => "my-org",
